@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bad Spelling Generator</title>
+    <title>Hangman Game</title>
     <link href="https://fonts.googleapis.com/css?family=Lora:500,700,500italic,700italic" rel="stylesheet" type="text/css" />
     <link href="css/styles.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="assets/profpic.JPG" />
 </head>
 <body>
     <nav class="navbar" id="top">
@@ -20,52 +19,196 @@
         </div>
     </nav>
 
-<div class="game-container">
-    <h1>Bad Spelling Generator</h1>
-    <input type="text" id="wordInput" placeholder="Enter a word or name">
-    <button onclick="generateBadSpellings()">Generate Bad Spellings</button>
-    <div id="spellingsList"></div>
-</div>
+    <div class="game-container">
+        <h1>Hangman</h1>
+        <p>Select a category and try to guess the word!</p>
+        <select id="category-select">
+            <option value="">Choose a category</option>
+            <option value="construction">Construction</option>
+            <option value="ocean">Ocean</option>
+            <option value="school">School</option>
+            <option value="sky">Sky</option>
+            <option value="animals">Animals</option>
+        </select>
+        <button id="start-game">Start Game</button>
+        <div id="game-area" style="display: none;">
+            <div id="hangman-drawing"></div>
+            <div id="word-display"></div>
+            <div id="guesses">Wrong guesses: <span id="wrong-guesses"></span></div>
+            <input type="text" id="guess-input" maxlength="1">
+            <button id="guess-button">Guess</button>
+        </div>
+        <div id="result-message"></div>
+        <button id="play-again" style="display: none;">Play Again</button>
+    </div>
 
-<script>
-    function generateBadSpellings() {
-        const word = document.getElementById('wordInput').value;
-        const badSpellings = generateBadSpellingsForWord(word);
-        displaySpellings(badSpellings);
-    }
+    <script>
+        const wordLists = {
+            construction: ["scaffold", "excavator", "bulldozer", "foundation", "blueprint", "surveyor", "concrete", "demolition", "architect", "plumbing", "electrical", "carpentry", "masonry", "welding", "insulation", "drywall", "roofing", "flooring", "painting", "landscaping", "crane", "forklift", "jackhammer", "backhoe", "trencher", "grader", "paver", "compactor", "scaffolding", "formwork"],
+            ocean: ["abyss", "archipelago", "atoll", "barnacle", "bioluminescence", "cetacean", "coral", "current", "estuary", "guyot", "hydrothermal", "kelp", "mangrove", "nekton", "phytoplankton", "polyp", "salinity", "seamount", "thermocline", "tsunami", "upwelling", "vortex", "zooplankton", "abyssal", "benthic", "cephalopod", "cnidarian", "echinoderm", "pelagic", "symbiosis"],
+            school: ["curriculum", "pedagogy", "assessment", "syllabus", "dissertation", "plagiarism", "bibliography", "thesis", "seminar", "lecture", "laboratory", "internship", "fellowship", "matriculation", "commencement", "valedictorian", "accreditation", "prerequisite", "elective", "transcript", "symposium", "colloquium", "practicum", "dissertation", "viva", "doctorate", "postdoctoral", "tenure", "sabbatical", "alumnus"],
+            sky: ["aurora", "cirrus", "cumulus", "nimbus", "stratus", "contrail", "jetstream", "stratosphere", "troposphere", "mesosphere", "ionosphere", "exosphere", "airglow", "albedo", "crepuscular", "iridescence", "mammatus", "noctilucent", "parhelion", "virga", "zenith", "nadir", "azimuth", "celestial", "equinox", "solstice", "precession", "parallax", "aphelion", "perihelion"],
+            animals: ["platypus", "axolotl", "quokka", "narwhal", "pangolin", "echidna", "tardigrade", "coelacanth", "okapi", "blobfish", "kakapo", "aye-aye", "numbat", "dugong", "olm", "fossa", "gharial", "kinkajou", "loris", "nudibranch", "quetzal", "tapir", "xenops", "yeti crab", "zebu", "babirusa", "cuscus", "dhole", "gerenuk", "hoatzin"]
+        };
 
-    function generateBadSpellingsForWord(word) {
-        const vowels = 'aeiou';
-        const consonants = 'bcdfghjklmnpqrstvwxyz';
-        let variations = new Set();
+        let selectedWord;
+        let guessedLetters;
+        let wrongGuesses;
+        let maxWrongGuesses = 6;
 
-        while (variations.size < 10) {
-            let newWord = word.toLowerCase().split('');
-            const pos = Math.floor(Math.random() * newWord.length);
-            
-            if (vowels.includes(newWord[pos])) {
-                newWord[pos] = vowels[Math.floor(Math.random() * vowels.length)];
-            } else if (consonants.includes(newWord[pos])) {
-                newWord[pos] = consonants[Math.floor(Math.random() * consonants.length)];
+        const categorySelect = document.getElementById('category-select');
+        const startGameButton = document.getElementById('start-game');
+        const gameArea = document.getElementById('game-area');
+        const hangmanDrawing = document.getElementById('hangman-drawing');
+        const wordDisplay = document.getElementById('word-display');
+        const wrongGuessesDisplay = document.getElementById('wrong-guesses');
+        const guessInput = document.getElementById('guess-input');
+        const guessButton = document.getElementById('guess-button');
+        const resultMessage = document.getElementById('result-message');
+        const playAgainButton = document.getElementById('play-again');
+
+        startGameButton.addEventListener('click', startGame);
+        guessButton.addEventListener('click', makeGuess);
+        guessInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') makeGuess();
+        });
+        playAgainButton.addEventListener('click', () => {
+            resultMessage.style.display = 'none';
+            playAgainButton.style.display = 'none';
+            gameArea.style.display = 'none';
+            startGame
+        });
+
+        const hangmanStages = [
+            `
+  +---+
+  |   |
+      |
+      |
+      |
+      |
+=========`,
+            `
+  +---+
+  |   |
+  O   |
+      |
+      |
+      |
+=========`,
+            `
+  +---+
+  |   |
+  O   |
+  |   |
+      |
+      |
+=========`,
+            `
+  +---+
+  |   |
+  O   |
+ /|   |
+      |
+      |
+=========`,
+            `
+  +---+
+  |   |
+  O   |
+ /|\\  |
+      |
+      |
+=========`,
+            `
+  +---+
+  |   |
+  O   |
+ /|\\  |
+ /    |
+      |
+=========`,
+            `
+  +---+
+  |   |
+  O   |
+ /|\\  |
+ / \\  |
+      |
+=========`
+        ];
+
+        function startGame() {
+            const category = categorySelect.value;
+            if (!category) {
+                alert('Please select a category');
+                return;
             }
-
-            variations.add(newWord.join(''));
+            
+            selectedWord = wordLists[category][Math.floor(Math.random() * wordLists[category].length)].toUpperCase();
+            guessedLetters = new Set();
+            wrongGuesses = 0;
+            
+            gameArea.style.display = 'block';
+            hangmanDrawing.innerHTML = hangmanStages[0];
+            wrongGuessesDisplay.textContent = '';
+            resultMessage.style.display = 'none';
+            playAgainButton.style.display = 'none';
+            updateWordDisplay();
         }
 
-        return Array.from(variations);
-    }
+        function updateWordDisplay() {
+            wordDisplay.textContent = selectedWord
+                .split('')
+                .map(letter => guessedLetters.has(letter) ? letter : '_')
+                .join(' ');
+        }
 
-    function displaySpellings(spellings) {
-        const list = document.getElementById('spellingsList');
-        list.innerHTML = '<h2>Bad Spellings:</h2>';
-        const ul = document.createElement('ul');
-        spellings.forEach(spelling => {
-            const li = document.createElement('li');
-            li.textContent = spelling;
-            ul.appendChild(li);
-        });
-        list.appendChild(ul);
-    }
-</script>
+        function makeGuess() {
+            const guess = guessInput.value.toUpperCase();
+            guessInput.value = '';
+            
+            if (!guess || guessedLetters.has(guess)) return;
+            
+            guessedLetters.add(guess);
+            
+            if (selectedWord.includes(guess)) {
+                updateWordDisplay();
+                if (!wordDisplay.textContent.includes('_')) {
+                    endGame(true);
+                }
+            } else {
+                wrongGuesses++;
+                wrongGuessesDisplay.textContent = wrongGuesses;
+                updateHangmanDrawing();
+                if (wrongGuesses >= maxWrongGuesses) {
+                    endGame(false);
+                }
+            }
+        }
+
+        function updateHangmanDrawing() {
+            hangmanDrawing.textContent = hangmanStages[wrongGuesses];
+        }
+
+        function endGame(won) {
+            if (won) {
+                resultMessage.innerHTML = `
+                    <h2>Congratulations! You guessed the word!</h2>
+                    <p>The word was: ${selectedWord}</p>
+                    <pre>${hangmanStages[wrongGuesses]}</pre>
+                `;
+            } else {
+                resultMessage.innerHTML = `
+                    <h2>Game over!</h2>
+                    <p>The word was: ${selectedWord}</p>
+                    <pre>${hangmanStages[6]}</pre>
+                `;
+            }
+            gameArea.style.display = 'none';
+            resultMessage.style.display = 'block';
+            playAgainButton.style.display = 'inline-block';
+        }
+    </script>
 </body>
 </html>

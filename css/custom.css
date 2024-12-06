@@ -14,12 +14,17 @@ body {
 
 .link { 
   margin: 35px;
+  background-color: white;
+  color: black;
+  padding: 20px;
   text-align: center;
 }
 .link a {
-  color: white;
+  color: black;
   text-decoration: none;
-
+}
+.link a:hover {
+  color: darkblue;
 }
 
 .text {
@@ -71,31 +76,37 @@ h2 {
   }
 }
 
+
 .game-container {
   max-width: 600px;
-  margin: 50px auto;
+  margin: 0 auto;
+  text-align: center;
+  padding: 20px;
+  background-color: aliceblue;
+}
+#hangman-drawing {
+  font-family: monospace;
+  white-space: pre;
+  line-height: 1.2;
+  font-size: 14px;
+  margin: 20px auto;
+}
+#word-display {
+  font-size: 24px;
+  margin: 20px 0;
+  letter-spacing: 5px;
+}
+#guess-input {
+  width: 30px;
+  font-size: 18px;
   text-align: center;
 }
-
-input, button {
+#result-message {
   font-size: 18px;
-  padding: 10px;
-  margin: 10px;
-}
-
-#spellingsList {
+  font-weight: bold;
   margin-top: 20px;
-  text-align: left;
-  background-color: aliceblue;
-  text-align: left;
 }
-
-#spellingsList ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-#spellingsList li {
-  margin-bottom: 5px;
-  font-size: 16px;
+#result-message pre {
+  text-align: left;
+  display: inline-block;
 }
