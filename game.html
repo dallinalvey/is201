@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bad Spelling Generator</title>
+    <link href="https://fonts.googleapis.com/css?family=Lora:500,700,500italic,700italic" rel="stylesheet" type="text/css" />
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/css/custom.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="assets/profpic.JPG" />
+</head>
+<body>
+    <nav class="navbar" id="top">
+        <div class="navbar-left">
+          Dallin Alvey
+        </div>
+        <div class="navbar-right">
+          <a href="index.html">Resume</a>
+          <a href="volcano.html">Volcanoes</a>
+        </div>
+    </nav>
+
+<div class="game-container">
+    <h1>Bad Spelling Generator</h1>
+    <input type="text" id="wordInput" placeholder="Enter a word or name">
+    <button onclick="generateBadSpellings()">Generate Bad Spellings</button>
+    <div id="spellingsList"></div>
+</div>
+
+<script>
+    function generateBadSpellings() {
+        const word = document.getElementById('wordInput').value;
+        const badSpellings = generateBadSpellingsForWord(word);
+        displaySpellings(badSpellings);
+    }
+
+    function generateBadSpellingsForWord(word) {
+        const vowels = 'aeiou';
+        const consonants = 'bcdfghjklmnpqrstvwxyz';
+        let variations = new Set();
+
+        while (variations.size < 10) {
+            let newWord = word.toLowerCase().split('');
+            const pos = Math.floor(Math.random() * newWord.length);
+            
+            if (vowels.includes(newWord[pos])) {
+                newWord[pos] = vowels[Math.floor(Math.random() * vowels.length)];
+            } else if (consonants.includes(newWord[pos])) {
+                newWord[pos] = consonants[Math.floor(Math.random() * consonants.length)];
+            }
+
+            variations.add(newWord.join(''));
+        }
+
+        return Array.from(variations);
+    }
+
+    function displaySpellings(spellings) {
+        const list = document.getElementById('spellingsList');
+        list.innerHTML = '<h2>Bad Spellings:</h2>';
+        const ul = document.createElement('ul');
+        spellings.forEach(spelling => {
+            const li = document.createElement('li');
+            li.textContent = spelling;
+            ul.appendChild(li);
+        });
+        list.appendChild(ul);
+    }
+</script>
+</body>
+</html>
