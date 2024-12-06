@@ -1,6 +1,11 @@
 body {
   font-family: "Lora";
   background-image: url("../assets/volcano.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
 }
@@ -29,6 +34,24 @@ body {
 
 .text {
   background-color: rgba(255, 242, 242, 0.9);
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.video {
+  background-color: rgba(250, 235, 215, 0.919);
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.table {
+  background-color: rgba(177, 243, 221, 0.944);
   padding: 20px;
   margin-bottom: 20px;
   border-radius: 10px;
@@ -74,39 +97,4 @@ h2 {
   .tableau-container {
     height: 400px;
   }
-}
-
-
-.game-container {
-  max-width: 600px;
-  margin: 0 auto;
-  text-align: center;
-  padding: 20px;
-  background-color: aliceblue;
-}
-#hangman-drawing {
-  font-family: monospace;
-  white-space: pre;
-  line-height: 1.2;
-  font-size: 14px;
-  margin: 20px auto;
-}
-#word-display {
-  font-size: 24px;
-  margin: 20px 0;
-  letter-spacing: 5px;
-}
-#guess-input {
-  width: 30px;
-  font-size: 18px;
-  text-align: center;
-}
-#result-message {
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 20px;
-}
-#result-message pre {
-  text-align: left;
-  display: inline-block;
 }
